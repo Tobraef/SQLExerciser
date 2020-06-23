@@ -1,0 +1,39 @@
+﻿<div class="form-group">
+    <label for="queryIn" class="control-label"><b>Test your query against a database:</b></label>
+    <div class="col-md-10">
+        <textarea rows="20" cols="200" name="queryInput" id="queryIn" onclick="restartTextArea()"></textarea>
+    </div>
+</div>
+<div class="text-justify">
+    <input type="button" role="button" value="Execute query" onclick="executeQuery()" class="btn btn-info" />
+    <label id="outputId">Output ...</label>
+</div>
+
+<script>
+
+    var createQuery = 'CREATE TABLE tab (id int PRIMARY KEY);';
+    document.getElementById('queryIn').value = createQuery;
+    function restartTextArea() {
+        var txtArea = document.getElementById('queryIn');
+        if (txtArea.textContent == createQuery) {
+            txtArea.value = '';
+        }
+    }
+    function executeQuery() {
+        var insertedQuery = document.getElementById('queryIn').value;
+        alert(insertedQuery);
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("TryQuery", "Diagram")',// + '/' + insertedQuery,
+            data: { query: insertedQuery },
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (data) {
+                document.getElementById('outputId').innerHTML = 'Received output from DB: ' + data.result;
+            },
+            error: function (data) {
+                document.getElementById('outputId').innerHTML = 'Received output from DB: ' + data.result;
+            }
+        });
+    }
+</script>

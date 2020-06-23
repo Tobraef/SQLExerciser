@@ -1,0 +1,64 @@
+﻿@model SQLExerciser.Models.SeedCreateViewModel
+
+@using (Html.BeginForm()) 
+{
+    @Html.AntiForgeryToken()
+    
+    <div class="form-horizontal">
+        <h3>Seed creation</h3>
+        <hr />
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+        @Html.HiddenFor(m => m.DiagramId)
+
+        <div>
+            <img class="img-rounded" src="@Url.Action("ReadImage", "Diagram", new { diagramId = Model.DiagramId })" 
+                 width="300" height="300"/>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.SeedQuery, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.TextAreaFor(model => model.SeedQuery, new { @class = "form-control", @rows = 10, @cols = 100, @id = "SeedQuery" })
+                @Html.ValidationMessageFor(model => model.SeedQuery, "", new { @class = "text-danger" })
+            </div>
+        </div>
+        <div class="form-group">
+            <label>Test your query: </label><input type="button" value="Test" onclick="testQuery()"/>
+            <label id="queryResult" />
+        </div>
+
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-10">
+                <input type="submit" value="Create" class="btn btn-default" />
+            </div>
+        </div>
+    </div>
+}
+
+<div>
+    @Html.ActionLink("Back to List", "Index")
+</div>
+
+<script>
+    var diagramId = @Model.DiagramId;
+    function testQuery() {
+        var label = document.getElementById("queryResult");
+        var input = document.getElementById("SeedQuery").value;
+        label.innerText = "Awaiting result...";
+        $.ajax({
+            type: 'GET',
+            url: '@Url.Action("TestQuery", "Seed")',// + '/' + input + '/' + diagramId,
+            data: {
+                query: input, diagramId: diagramId
+            },
+            contentType: 'application/json; charset=utf-8',
+            dataType: 'json',
+            success: function (data) {
+                label.innerText = 'Response from DB: ' + data.result;
+            },
+            error: function (data) {
+                label.innerText = "Failed to receive response from the server: " + data.result;
+            }
+        });
+    }
+</script>

@@ -1,0 +1,17 @@
+﻿@{
+    ViewBag.Title = "Home Page";
+}
+
+<div style="border-color: blueviolet; padding: inherit">
+    <div class="text-center">
+        <section>
+            Test your SQL skills, go to exercises &gt; &gt; <a href="/Home/Index">exercises</a>.
+        </section>
+        <p>
+            Navigation: 
+
+            @Html.ActionLink("Seeds index", "Index", "Seed")
+            @Html.ActionLink("Diagrams index", "Index", "Diagram")
+        </p>
+    </div>
+</div>

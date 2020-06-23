@@ -1,0 +1,40 @@
+﻿@model SQLExerciser.Models.DB.DbDiagram
+
+@{
+    ViewBag.Title = "Details";
+}
+
+<h2>Details</h2>
+
+<div>
+    <h4>Diagram</h4>
+    <hr />
+    <div class="text-center">
+        <img src="data:image/png;base64,@System.Convert.ToBase64String(Model.Diagram)" alt="" />
+    </div>
+        <p>
+        <dl class="dl-horizontal">
+            <dt>
+                @Html.DisplayNameFor(model => model.CreationQuery)
+            </dt>
+
+            <dd>
+                @Html.DisplayFor(model => model.CreationQuery)
+            </dd>
+
+            <dt>
+                @Html.DisplayNameFor(model => model.Name)
+            </dt>
+
+            <dd>
+                @Html.DisplayFor(model => model.Name)
+            </dd>
+        </dl>
+    </p>
+</div>
+<div style="border: solid; border-color: aqua; border-width: 2px; padding:5px;">
+    <p>@Html.ActionLink("Edit", "Edit", new { id = Model.DbDiagramId })</p>
+    <p>@Html.ActionLink("Back to List", "Index")</p>
+    <p>@Html.ActionLink("Correlated exercises", "ExercisesToDiagram", "Exercise", new { id = Model.DbDiagramId })</p>
+    <p>@Html.ActionLink("Add exercise to this diagram", "AddExerciseToDiagram", "Exercise", new { id = Model.DbDiagramId })</p>
+</div>

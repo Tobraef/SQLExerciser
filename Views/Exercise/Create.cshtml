@@ -1,0 +1,109 @@
+﻿@model SQLExerciser.Models.CreateExercise
+
+@{
+    ViewBag.Title = "Create";
+}
+
+<h2>Create</h2>
+
+@using (Html.BeginForm()) 
+{
+    @Html.AntiForgeryToken()
+    
+<div class="form-horizontal">
+    <h4>CreateExercise</h4>
+    <hr />
+    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+    <div class="form-group">
+        @Html.LabelFor(model => model.Difficulty, htmlAttributes: new { @class = "control-label col-md-2" })
+        <div class="col-md-10">
+            @Html.EditorFor(model => model.Difficulty, new { @class = "form-control" })
+            @Html.ValidationMessageFor(model => model.Difficulty, "", new { @class = "text-danger" })
+        </div>
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(model => model.Title, htmlAttributes: new { @class = "control-label col-md-2" })
+        <div class="col-md-10">
+            @Html.EditorFor(model => model.Title, new { @class = "form-control" })
+            @Html.ValidationMessageFor(model => model.Title, "", new { @class = "text-danger" })
+        </div>
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(model => model.Description, htmlAttributes: new { @class = "control-label col-md-2" })
+        <div class="col-md-10">
+            @Html.EditorFor(model => model.Description, new { @class = "form-control" })
+            @Html.ValidationMessageFor(model => model.Description, "", new { @class = "text-danger" })
+        </div>
+    </div>
+
+    <div>
+        <img class="img-rounded" src="@Url.Action("ReadImage", "Diagram", new { diagramId = Model.Diagram })"
+             width="300" height="300" />
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(model => model.SolutionQuery, htmlAttributes: new { @class = "control-label col-md-2" })
+        <div class="col-md-10">
+            @Html.TextAreaFor(model => model.SolutionQuery, new { @class = "form-control", @id = "SolutionQuery", @rows = 10, @cols = 25 })
+            @Html.ValidationMessageFor(model => model.SolutionQuery, "", new { @class = "text-danger" })
+            <input type="button" role="button" onclick="trySolution()" value="Test query" />
+            <label id="solutionQueryLabel" >Response: </label>
+        </div>
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(model => model.VerificationQuery, htmlAttributes: new { @class = "control-label col-md-2" })
+        <div class="col-md-10">
+            @Html.TextAreaFor(model => model.VerificationQuery, new { @class = "form-control", @id = "VerificationQuery", @rows = 10, @cols = 25 })
+            @Html.ValidationMessageFor(model => model.VerificationQuery, "", new { @class = "text-danger" })
+            <input type="button" role="button" onclick="tryVerify()" value="Test query"/>
+            <label id="verifyQueryLabel" >Response: </label>
+        </div>
+    </div>
+
+    @Html.HiddenFor(m => m.Diagram)
+
+    <div class="form-group">
+        <div class="col-md-offset-2 col-md-10">
+            <input type="submit" value="Create" class="btn btn-default" />
+        </div>
+    </div>
+</div>
+}
+
+<div>
+    @Html.ActionLink("Back to List", "Index")
+</div>
+
+<script>
+    function tryVerify() {
+        var solutionArea = document.getElementById('SolutionQuery').value;
+        var verifyArea = document.getElementById('VerificationQuery').value;
+        var data = { solution: solutionArea, verify: verifyArea, diagramId: @Model.Diagram };
+        postTo('@Url.Action("TestQueryDML", "Exercise")', document.getElementById('verifyQueryLabel'), data);
+    }
+
+    function trySolution() {
+        var solutionArea = document.getElementById('SolutionQuery').value;
+        var data = { query: solutionArea, diagramId: @Model.Diagram };
+        postTo('@Url.Action("TestQuery", "Exercise")', document.getElementById('solutionQueryLabel'), data);
+    }
+
+    function postTo(url, label, data) {
+        $.ajax({
+            type: 'GET',
+            url: url,
+            data: data,
+            contentType: 'application/json; charset=utf-8',
+            dataType: 'json',
+            success: function (data) {
+                label.innerText = 'Response from DB: ' + data.result;
+            },
+            error: function (data) {
+                label.innerText = "Failed to receive response from the server: " + data.result;
+            }
+        });
+    }
+</script>

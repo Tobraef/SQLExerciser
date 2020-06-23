@@ -1,0 +1,26 @@
+﻿@model SQLExerciser.Models.Seed.TableSeed
+
+<p class="text-center">
+    <strong>@Model.TableName</strong>
+</p>
+<table class="table-bordered" style="font-size: large">
+    <thead>
+        <tr>
+            @foreach (var header in Model.TableHeaders)
+            {
+                <td>@header</td>
+            }
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var row in Model.Rows)
+        {
+            <tr>
+                @foreach (var cell in row)
+                {
+                    <td>@cell</td>
+                }
+            </tr>
+        }
+    </tbody>
+</table>

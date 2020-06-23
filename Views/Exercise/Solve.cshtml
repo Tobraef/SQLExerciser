@@ -1,0 +1,27 @@
+﻿@model SQLExerciser.Models.DB.Exercise
+
+@{
+    ViewBag.Title = "Solve";
+}
+
+<h2>Solve</h2>
+
+<div class="text-capitalize">
+    @Model.Title
+</div>
+<p>@Model.Description</p>
+
+<div>
+    <img class="img-rounded" src="@Url.Action("ReadImage", "Diagram", new { diagramId = Model.Judge.Diagram })"
+         width="300" height="300" />
+</div>
+
+@using (Html.BeginForm("Solve", "Exercise", FormMethod.Post))
+{
+    <div class="form-group">
+        <label for="query" class="control-label">Query to submit:</label>
+        @Html.TextArea("query", new { @id = "query", @Value = "Your answer", @cols = 30, @rows = 10 })
+        <input type="submit" role="button" class="btn-lg btn-info" />
+    </div>
+    <input hidden id="id" name="id" value="@Model.Judge.Diagram.DbDiagramId" />
+}
