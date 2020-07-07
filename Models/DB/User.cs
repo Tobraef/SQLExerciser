@@ -11,8 +11,13 @@ namespace SQLExerciser.Models.DB
 {
     public class User
     {
-        [Key]
+        [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
+
+        public DateTime Created { get; set; }
+
+        [Required]
+        public virtual Role Role { get; set; }
 
         [Required]
         public string Account { get; set; }
@@ -20,6 +25,6 @@ namespace SQLExerciser.Models.DB
         [Required]
         public string Password { get; set; }
 
-        public virtual ICollection<ExerciseStatus> Statuses { get; set; }
+        public bool MailConfirmed { get; set; }
     }
 }

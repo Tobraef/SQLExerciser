@@ -15,6 +15,7 @@
     <h4>DbDiagram</h4>
     <hr />
 
+    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
     <div class="form-group">
         @Html.LabelFor(model => model.Name, htmlAttributes: new { @class = "control-label col-md-2" })
         <div class="col-md-10">
@@ -23,19 +24,22 @@
         </div>
     </div>
 
-    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
     <div class="form-group">
         @Html.LabelFor(model => model.CreationQuery, htmlAttributes: new { @class = "control-label col-md-2" })
         <div class="col-md-10">
-            @Html.EditorFor(model => model.CreationQuery, new { htmlAttributes = new { @class = "form-control" } })
+            @Html.TextAreaFor(model => model.CreationQuery, new { @class = "form-control", @rows = 10, @cols = 100, @onclick = "restartTextArea()" })
             @Html.ValidationMessageFor(model => model.CreationQuery, "", new { @class = "text-danger" })
+        </div>
+        <div class="text-justify">
+            <input type="button" role="button" value="Execute query" onclick="executeQuery()" class="btn btn-info" />
+            <label id="outputId">Output ...</label>
         </div>
     </div>
 
     <div class="form-group">
         @Html.LabelFor(m => m.Diagram, htmlAttributes: new { @class = "control-label col-md-2" })
         <div class="col-md-10">
-            <input type="file" />
+            <input type="file" name="image" id="image" />
         </div>
     </div>
 
@@ -59,3 +63,30 @@
 @section Scripts {
     @Scripts.Render("~/bundles/jqueryval")
 }
+<script>
+
+    var createQuery = 'CREATE TABLE tab (id int PRIMARY KEY);';
+    document.getElementById('CreationQuery').value = createQuery;
+    function restartTextArea() {
+        var txtArea = document.getElementById('CreationQuery');
+        if (txtArea.textContent == createQuery) {
+            txtArea.value = '';
+        }
+    }
+    function executeQuery() {
+        var insertedQuery = document.getElementById('queryIn').value;
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("TryQuery", "Diagram")',// + '/' + insertedQuery,
+            data: { query: insertedQuery },
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (data) {
+                document.getElementById('outputId').innerHTML = 'Received output from DB: ' + data.result;
+            },
+            error: function (data) {
+                document.getElementById('outputId').innerHTML = 'Received output from DB: ' + data.result;
+            }
+        });
+    }
+</script>

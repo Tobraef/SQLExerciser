@@ -14,7 +14,7 @@ using System.Data.SqlClient;
 
 namespace SQLExerciser.Controllers
 {
-    public class ExerciseController : Controller
+    public class ExerciseController : UserAccessController
     {
         readonly IExercisesContext _context;
         readonly IQueryTester _tester;
@@ -22,7 +22,30 @@ namespace SQLExerciser.Controllers
 
         public async Task<ViewResult> Index()
         {
-            return View(await Task.Run(() => _context.Exercises.ToList()));
+            var usr = CurrentUser;
+            if (usr != null)
+            {
+                var user = CurrentUser.Id;
+                var exercises = _context.Exercises
+                    .ToList();
+                var submissions = _context.Statuses
+                    .Where(s => s.User.Id == user)
+                    .ToList();
+                return View(await Task.Run(() => exercises.Select(e => new ExerciseWSubmissions
+                {
+                    Exercise = e,
+                    Statuses = submissions.Where(s => s.Exercise.ExerciseId == e.ExerciseId)
+                })));
+            }
+            else
+            {
+                var emptyList = new List<ExerciseStatus>();
+                return View(await Task.Run(() => _context.Exercises.Select(e => new ExerciseWSubmissions
+                {
+                    Exercise = e,
+                    Statuses = emptyList
+                })));
+            }
         }
 
         [HttpGet]
@@ -45,12 +68,14 @@ namespace SQLExerciser.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = Role.ExerciserRoles)]
         public Task<ViewResult> Create(int diagramId)
         {
             return Task.Run(() => View(new CreateExercise { Diagram = diagramId }));
         }
 
         [HttpPost]
+        [Authorize(Roles = Role.ExerciserRoles)]
         public async Task<ActionResult> Create(CreateExercise exercise)
         {
             if (ModelState.IsValid)
@@ -93,12 +118,14 @@ namespace SQLExerciser.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = Role.SolverRoles)]
         public ViewResult Solve(int id)
         {
             return View(_context.Exercises.Include(x => x.Judge.Diagram).FirstOrDefault(e => e.ExerciseId == id));
         }
 
         [HttpPost]
+        [Authorize(Roles = Role.SolverRoles)]
         public async Task<ViewResult> Solve(int id, string query)
         {
             var exercise = await Task.Run(() => _context.Exercises
@@ -113,12 +140,12 @@ namespace SQLExerciser.Controllers
             var output = await _exerciser.ExecuteExercise(exercise, query, setupQueries);
             if (output.Key)
             {
-                RegisterSuccess(exercise, query);
-                return View("Success", new { exercise, query });
+                await RegisterSuccess(exercise, query);
+                return View("Success", new KeyValuePair<Exercise, string>(exercise, query));
             }
             else
             {
-                RegisterFailure(exercise, query, output.Value);
+                await RegisterFailure(exercise, query, output.Value);
                 return View("Fail", new FailedSubmission
                 {
                     Exercise = exercise,
@@ -128,32 +155,37 @@ namespace SQLExerciser.Controllers
             }
         }
 
-        void RegisterSuccess(Exercise exercise, string query)
+        Task RegisterSuccess(Exercise exercise, string query)
         {
-            var user = _context.CurrentUser;
+            var user = CurrentUser;
             _context.Statuses.Add(new ExerciseStatus
             {
                 Accepted = true,
                 Solution = query,
                 Exercise = exercise,
-                User = user
+                User = user,
+                SubmittedOn = DateTime.Now
             });
+            return _context.SaveAsync();
         }
 
-        void RegisterFailure(Exercise exercise, string query, string output)
+        Task RegisterFailure(Exercise exercise, string query, string output)
         {
-            var user = _context.CurrentUser;
+            var user = CurrentUser;
             _context.Statuses.Add(new ExerciseStatus
             {
                 Accepted = false,
                 Resolution = output,
                 Solution = query,
                 Exercise = exercise,
-                User = user
+                User = user,
+                SubmittedOn = DateTime.Now
             });
+            return _context.SaveAsync();
         }
 
-        public ExerciseController(IExercisesContext ctx, IExerciser exerciser, IQueryTester tester)
+        public ExerciseController(IExercisesContext ctx, IExerciser exerciser, IQueryTester tester) :
+            base(ctx)
         {
             _context = ctx;
             _exerciser = exerciser;

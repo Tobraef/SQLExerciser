@@ -49,7 +49,7 @@ namespace SQLExerciser.Tests.E2E
                     Name = "Diagram1",
                     CreationQuery = q1,
                     Diagram = new byte[] { 1, 2, 3 }
-                });
+                }, null);
                 diagrams = (await diagramController.Index()).Model as List<DbDiagram>;
 
                 Assert.Single(diagrams, d => d.Name == "Diagram1" && d.CreationQuery == q1);
@@ -57,12 +57,11 @@ namespace SQLExerciser.Tests.E2E
             {
                 SeedController seedController = new SeedController(db, tester);
                 var diagram = db.Diagrams.Single();
-                var seeds = (await seedController.Index(diagram.DbDiagramId)).Model as List<Seed>;
+                var seeds = (await seedController.Index()).Model as IEnumerable<IGrouping<int, Seed>>;
 
                 Assert.Empty(seeds);
 
                 var model1 = seedController.Create(diagram.DbDiagramId).Result.Model as SeedCreateViewModel;
-                Assert.Equal(model1.Diagram, new byte[] { 1, 2, 3 });
                 Assert.Equal(model1.DiagramId, diagram.DbDiagramId);
 
                 const string seedQuery = "INSERT INTO tab_1 (id, name) VALUES (1, 'aaa'), (2, 'bbb'), (3, 'ccc');";
@@ -85,7 +84,6 @@ namespace SQLExerciser.Tests.E2E
                 await exerciseController.Create(new CreateExercise
                 {
                     Diagram = diagram.DbDiagramId,
-                    Seeds = seed.DataSeedId.ToString(),
                     Description = "Exercising",
                     Title = "Exercise_1",
                     SolutionQuery = query,

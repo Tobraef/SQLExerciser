@@ -1,0 +1,22 @@
+﻿@model SQLExerciser.Models.ViewModel.Login
+
+@{
+    ViewBag.Title = "Login";
+}
+
+<h2>Login</h2>
+@using (Html.BeginForm())
+{
+    @Html.ValidationSummary();
+    <div class="form-group">
+        @Html.LabelFor(m => m.AccountName, new { @class = "control-label" })
+        @Html.EditorFor(m => m.AccountName, new { @class = "form-control" })
+        @Html.ValidationMessageFor(m => m.AccountName)
+    </div>
+    <div class="form-group">
+        @Html.LabelFor(m => m.Password, new { @class = "control-label" })
+        @Html.PasswordFor(m => m.Password, new { @class = "form-control single-line" })
+        @Html.ValidationMessageFor(m => m.Password)
+    </div>
+    <input class="btn btn-default" role="button" type="submit" value="Submit"/>
+}

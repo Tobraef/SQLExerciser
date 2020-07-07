@@ -25,5 +25,7 @@ namespace SQLExerciser.Models.DB
         public string Description { get; set; }
 
         public virtual Judge Judge { get; set; }
+
+        public virtual ICollection<ExerciseStatus> ExerciseStatuses { get; set; }
     }
 }

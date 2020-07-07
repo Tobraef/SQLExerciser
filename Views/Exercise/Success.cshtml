@@ -1,7 +1,10 @@
-﻿
+﻿@model KeyValuePair<SQLExerciser.Models.DB.Exercise, string>
 @{
     ViewBag.Title = "Success";
 }
 
 <h2>Success</h2>
 
+<p class="success">Congratulations, it's a correct query.</p>
+<p>This exercise was of difficulty @Model.Key.Difficulty</p>
+<p>Nice work, @Html.ActionLink("Back to exercises", "Index")</p>

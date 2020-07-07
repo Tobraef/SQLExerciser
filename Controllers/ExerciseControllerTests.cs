@@ -34,14 +34,14 @@ namespace SQLExerciser.Tests.Controllers
             sut = new ExerciseController(db, exerciserMock.Object, testerMock.Object);
 
 
-            var vm = (await sut.Create()).Model as List<DataSeed>;
-            Assert.Equal(vm, db.Seeds);
+            var view = await sut.Create(db.EmployeesDiagram.DbDiagramId);
+            var vm = view.Model as CreateExercise;
+            Assert.Equal(vm.Diagram, db.EmployeesDiagram.DbDiagramId);
             var response = await sut.Create(new CreateExercise
             {
                 VerificationQuery = "ANS",
                 SolutionQuery = "SOL",
                 Title = "TIT",
-                Seeds = "1_2",
                 Description = "DESC",
                 Difficulty = 33,
                 Diagram = db.EmployeesDiagram.DbDiagramId
@@ -50,7 +50,7 @@ namespace SQLExerciser.Tests.Controllers
             Assert.Single(db.Exercises,
                 e => e.Difficulty == 33 && e.Title.Equals("TIT"));
             Assert.Contains(db.Judges,
-                j => j.Seeds.Count(s => s.DataSeedId == 1 || s.DataSeedId == 2) == 2 && j.AnswerQuery == "SOL" && j.VerifyQuery == "ANS");
+                j => j.AnswerQuery == "SOL" && j.VerifyQuery == "ANS");
             Assert.Equal(db.Exercises.Single(e => e.Difficulty == 33).Judge, db.Judges.Single(j => j.AnswerQuery == "SOL"));
         }
 
@@ -58,7 +58,7 @@ namespace SQLExerciser.Tests.Controllers
         public async Task MarkSuccessOnValidQuery()
         {
             var exercise = db.EmployeesExercises.First();
-            exerciserMock.Setup(e => e.ExecuteExercise(It.Is<Exercise>(s => s == exercise), It.IsAny<string>()))
+            exerciserMock.Setup(e => e.ExecuteExercise(It.Is<Exercise>(s => s == exercise), It.IsAny<string>(), It.IsAny<IEnumerable<string>>()))
                 .ReturnsAsync(() => new KeyValuePair<bool, string>(true, ""));
             sut = new ExerciseController(db, exerciserMock.Object, null);
 
@@ -74,7 +74,7 @@ namespace SQLExerciser.Tests.Controllers
         public async Task MarkFailureOnInvalidQuery()
         {
             var exercise = db.EmployeesExercises.First();
-            exerciserMock.Setup(e => e.ExecuteExercise(It.Is<Exercise>(s => s == exercise), It.IsAny<string>()))
+            exerciserMock.Setup(e => e.ExecuteExercise(It.Is<Exercise>(s => s == exercise), It.IsAny<string>(), It.IsAny<IEnumerable<string>>()))
                 .ReturnsAsync(() => new KeyValuePair<bool, string>(false, "Bad answer"));
             sut = new ExerciseController(db, exerciserMock.Object, null);
 

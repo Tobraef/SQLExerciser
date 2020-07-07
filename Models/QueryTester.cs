@@ -13,6 +13,7 @@ namespace SQLExerciser.Models
         Task<string> TestTableSetup(string setup);
 
         Task<string> TestCRUD(string setup, string query);
+        Task<string> TestCRUD(string setup, IEnumerable<string> query);
 
         Task<string> TestSelect(string setup, IEnumerable<string> seeds, string query);
     }
@@ -53,6 +54,25 @@ namespace SQLExerciser.Models
                 {
                     setup, query
                 }, null));
+                return string.Empty;
+            }
+            catch (Exception ex)
+            {
+                return "ERROR: " + ex.Message;
+            }
+        }
+
+        public async Task<string> TestCRUD(string setup, IEnumerable<string> queries)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(queries.Last()))
+                {
+                    throw new Exception("Query cannot be empty");
+                }
+                var setups = new List<string> { setup };
+                setups.AddRange(queries);
+                await Task.Run(() => _executor.ExecuteWithRollback(setups, null));
                 return string.Empty;
             }
             catch (Exception ex)

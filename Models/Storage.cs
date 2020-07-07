@@ -24,6 +24,7 @@ namespace SQLExerciser.Models
     {
         HttpSessionStateBase _session;
         public static string ConnectionString => string.Format("Data Source=(localdb)\\MSSQLLocalDB;Integrated Security=SSPI");
+        public const string WebsiteName = "www.SqlExerciser.com";
 
         public HttpSessionStateBase Session {
             set

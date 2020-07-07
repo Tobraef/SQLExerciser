@@ -6,29 +6,7 @@
 
 <h2>Fail</h2>
 
-<div>
-    <h4>FailedSubmission</h4>
-    <hr />
-    <dl class="dl-horizontal">
-        <dt>
-            @Html.DisplayNameFor(model => model.Query)
-        </dt>
-
-        <dd>
-            @Html.DisplayFor(model => model.Query)
-        </dd>
-
-        <dt>
-            @Html.DisplayNameFor(model => model.Result)
-        </dt>
-
-        <dd>
-            @Html.DisplayFor(model => model.Result)
-        </dd>
-
-    </dl>
-</div>
-<p>
-    @Html.ActionLink("Edit", "Edit", new { /* id = Model.PrimaryKey */ }) |
-    @Html.ActionLink("Back to List", "Index")
-</p>
+<p>Your submission was incorrect, reason: <text class="alert">@Model.Result</text></p>
+<p>Your query: @Model.Query</p>
+<p>@Html.ActionLink("Try once more", "Solve", new { id = Model.Exercise.ExerciseId })</p>
+<p>@Html.ActionLink("Back to exercises", "Index")</p>

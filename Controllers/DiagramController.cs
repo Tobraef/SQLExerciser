@@ -12,6 +12,7 @@ using SQLExerciser.Models;
 
 namespace SQLExerciser.Controllers
 {
+    [Authorize(Roles = Role.ExerciserRoles)]
     public class DiagramController : Controller
     {
         readonly IExercisesContext _context;
@@ -68,7 +69,7 @@ namespace SQLExerciser.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult> Create(DbDiagram receivedDiagram)
+        public async Task<ActionResult> Create(DbDiagram receivedDiagram, HttpPostedFileBase image)
         {
             if (ModelState.IsValid)
             {
@@ -77,20 +78,16 @@ namespace SQLExerciser.Controllers
                 {
                     return View(receivedDiagram);
                 }
-                if (Request.Files.Count == 0)
+                if (image == null)
                 {
-                    receivedDiagram.Diagram = HardcodedDiagram;
+                    receivedDiagram.Diagram = receivedDiagram.Diagram ?? HardcodedDiagram;
                 }
                 else
                 {
-                    var pic = Request.Files[0];
-                    using (var reader = new MemoryStream())
+                    using (MemoryStream mStream = new MemoryStream())
                     {
-                        if (receivedDiagram.Diagram == null && pic != null)
-                        {
-                            await pic.InputStream.CopyToAsync(reader);
-                            receivedDiagram.Diagram = reader.ToArray();
-                        }
+                        image.InputStream.CopyTo(mStream);
+                        receivedDiagram.Diagram = mStream.ToArray();
                     }
                 }
                 _context.Diagrams.Add(receivedDiagram);

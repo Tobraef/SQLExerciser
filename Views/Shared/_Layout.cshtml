@@ -3,9 +3,11 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@ViewBag.Title - My ASP.NET Application</title>
+    <title>@ViewBag.Title</title>
     @Styles.Render("~/Content/css")
     @Scripts.Render("~/bundles/modernizr")
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/bootstrap")
 </head>
 <body>
     <div class="navbar navbar-inverse navbar-fixed-top">
@@ -20,11 +22,25 @@
             </div>
             <div class="navbar-collapse collapse">
                 <ul class="nav navbar-nav">
+                    @if (User.IsInRole(SQLExerciser.Models.DB.Role.ExerciserRoles))
+                    {
                     <li>@Html.ActionLink("Diagrams", "Index", "Diagram")</li>
-                    <li>@Html.ActionLink("Exercises", "Index", "Exercise")</li>
                     <li>@Html.ActionLink("Database seeds", "Index", "Seed")</li>
-                    <li>@Html.ActionLink("Judges", "Index", "Judge")</li>
+                    }
+                    <li>@Html.ActionLink("Exercises", "Index", "Exercise")</li>
                 </ul>
+                <div class="navbar-right">
+                    @if (User.Identity.IsAuthenticated)
+                    {
+                        @Html.ActionLink("Logout", "Logout", "Account")
+                    }
+                    else
+                    {
+                        @Html.ActionLink("Sign in", "Login", "Account")
+                        <text> | </text>
+                        @Html.ActionLink("Register", "Create", "Account")
+                    }
+                </div>
             </div>
         </div>
     </div>
@@ -33,8 +49,6 @@
         <hr />
     </div>
 
-    @Scripts.Render("~/bundles/jquery")
-    @Scripts.Render("~/bundles/bootstrap")
     @RenderSection("scripts", required: false)
 </body>
 </html>

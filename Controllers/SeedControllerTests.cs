@@ -9,6 +9,7 @@ using SQLExerciser.Tests.Framework;
 using SQLExerciser.Controllers;
 using SQLExerciser.Models.DB;
 using SQLExerciser.Models;
+using SQLExerciser.Models.ViewModel;
 using Moq;
 using Xunit;
 
@@ -17,7 +18,7 @@ namespace SQLExerciser.Tests.Controllers
     [Microsoft.VisualStudio.TestTools.UnitTesting.TestClass]
     public class SeedControllerTests
     {
-        Mock<IDbSet<DataSeed>> seedMock = new Mock<IDbSet<DataSeed>>();
+        FakeDbSet<DataSeed> seedMock = new FakeDbSet<DataSeed>();
         Mock<IExercisesContext> dbMock = new Mock<IExercisesContext>();
         FakeDbSet<DbDiagram> diagramMock = new FakeDbSet<DbDiagram>();
         Mock<IQueryTester> testerMock = new Mock<IQueryTester>();
@@ -32,13 +33,13 @@ namespace SQLExerciser.Tests.Controllers
             diagramMock.Add(diagrams.First());
             diagramMock.Add(diagrams.Last());
             dbMock.Setup(d => d.Diagrams).Returns(diagramMock);
-            dbMock.Setup(d => d.Seeds).Returns(seedMock.Object);
+            dbMock.Setup(d => d.Seeds).Returns(seedMock);
         }
 
         private DbDiagram SampleDiagram =>
             new DbDiagram { DbDiagramId = 1, CreationQuery = "AAA", Diagram = new byte[] { 0 }, Name = "Name" };
         private DataSeed SampleSeed =>
-            new DataSeed { DataSeedId = 0, Diagram = SampleDiagram, Judges = new List<Judge>(), SeedQuery = "seed" };
+            new DataSeed { DataSeedId = 0, Diagram = SampleDiagram, SeedQuery = "seed" };
 
         bool CompareSeeds(DataSeed actualy, DataSeed expected)
         {
@@ -53,10 +54,8 @@ namespace SQLExerciser.Tests.Controllers
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestMethod]
         public async Task CreateSeedOnValidInput()
         {
-            seedMock.Setup(m => m.Add(It.Is<DataSeed>(i => CompareSeeds(i, SampleSeed))));
             SetupDbMock();
-            testerMock.Setup(m => m.TestTableSetup(It.Is<string>(t => t.Equals("AAA")))).ReturnsAsync("OK");
-            testerMock.Setup(m => m.TestTableSetup(It.Is<string>(t => t.Equals("seed")))).ReturnsAsync("OK");
+            testerMock.Setup(m => m.TestCRUD(It.IsAny<string>(), It.Is<string>(s => s.Contains("seed")))).ReturnsAsync("OK");
 
             sut = new SeedController(dbMock.Object, testerMock.Object);
             await sut.Create(1);
@@ -72,7 +71,6 @@ namespace SQLExerciser.Tests.Controllers
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestMethod]
         public void ParsingInsertQueryTest()
         {
-            var exercises = new List<string> { "Find ids", "Date diff", "Starts with faculty" };
             string insertQuery = "INSERT INTO employees (id, name, date, faculty) VALUES\n" +
                 "(1, 'josh', '20-01-21', 'nebrasca'),\n" +
                 "(2, 'jan', '11-05-08', 'colonesca'),\n" +
@@ -81,7 +79,7 @@ namespace SQLExerciser.Tests.Controllers
                 "INSERT INTO wagabah (representation, employeeId, supremacy) VALUES\n" +
                 "('binary', 1, 'superior'),\n" +
                 "('nonbinary', 2, 'inferior');";
-            Seed seed = new Seed(insertQuery, new byte[] { 1, 2, 3 }, 5, exercises);
+            Seed seed = new Seed(insertQuery, 1, 5);
 
             var tables = seed.TableSeeds;
             var employeeTable = tables.First();

@@ -1,4 +1,4 @@
-﻿@model IEnumerable<SQLExerciser.Models.DB.Exercise>
+﻿@model IEnumerable<SQLExerciser.Models.ViewModel.ExerciseWSubmissions>
 
 @{
     ViewBag.Title = "Index";
@@ -6,41 +6,39 @@
 
 <h2>Index</h2>
 
-<p>
-    @Html.ActionLink("Create New", "Create")
-</p>
 <table class="table">
     <tr>
         <th>
-            @Html.DisplayNameFor(model => model.Difficulty)
+            @Html.DisplayNameFor(model => model.Exercise.Difficulty)
         </th>
         <th>
-            @Html.DisplayNameFor(model => model.Title)
+            @Html.DisplayNameFor(model => model.Exercise.Title)
         </th>
         <th>
-            @Html.DisplayNameFor(model => model.Description)
+            @Html.DisplayNameFor(model => model.Exercise.Description)
         </th>
         <th></th>
     </tr>
 
-@foreach (var item in Model) {
-    <tr>
-        <td>
-            @Html.DisplayFor(modelItem => item.Difficulty)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.Title)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.Description)
-        </td>
-        <td>
-            @Html.ActionLink("Edit", "Edit", new { id = item.ExerciseId }) |
-            @Html.ActionLink("Details", "Details", new { id = item.ExerciseId }) |
-            @Html.ActionLink("Delete", "Delete", new { id = item.ExerciseId }) |
-            @Html.ActionLink("Solve", "Solve", new { id = item.ExerciseId })
-        </td>
-    </tr>
-}
-
+    @foreach (var item in Model)
+    {
+        string bgColor;
+        if (item.Statuses.Count() == 0) { bgColor = "aliceblue"; }
+        else if (item.Statuses.Any(s => s.Accepted)) { bgColor = "forestgreen"; }
+        else { bgColor = "lightcoral"; }
+        <tr style="background-color: @bgColor">
+            <td>
+                @Html.DisplayFor(modelItem => item.Exercise.Difficulty)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Exercise.Title)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Exercise.Description)
+            </td> 
+            <td>
+                @Html.ActionLink("Solve", "Solve", new { id = item.Exercise.ExerciseId })
+            </td>
+        </tr>
+    }
 </table>

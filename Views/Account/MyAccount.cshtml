@@ -1,0 +1,42 @@
+﻿@model SQLExerciser.Models.ViewModel.AccountResume
+
+@{
+    ViewBag.Title = "MyAccount";
+}
+<style>
+    .frame {
+        display: inline-block;
+        border-radius: 20%;
+        border: 5px solid cornflowerblue;
+        padding: 10px;
+    }
+    div {
+        margin-bottom: 5px;
+        margin-top: 5px;
+    }
+</style>
+<h2>My Account</h2>
+
+<div class="frame">
+    <div>Account name: @Model.AccountName</div>
+    <div>Created at: @Model.Created.ToString()</div>
+    <div>Your rank: @Model.Role</div>
+</div>
+<div class="frame">
+    <div>Average difficulty on last 10 exercises: @Model.AverageOn10Last.ToString("##.##")</div>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Not yet solved exercises</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var submission in Model.NotSuccessfulSubmissions)
+            {
+                <tr>
+                    @Html.ActionLink(submission.Value, "Solve", "Exercise", new { id = submission.Key }, new { })
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

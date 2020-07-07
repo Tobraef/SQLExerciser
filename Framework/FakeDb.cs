@@ -55,6 +55,28 @@ namespace SQLExerciser.Tests.Framework
         public List<Exercise> EmployeesExercises => _exercises.Take(1).ToList();
         public List<Exercise> DatasExercises => _exercises.Skip(1).ToList();
 
+        public List<string> EmployeesSetup
+        {
+            get
+            {
+                var l = new List<string>();
+                l.Add(EmployeesDiagram.CreationQuery);
+                l.AddRange(EmployeesSeeds.Select(s => s.SeedQuery));
+                return l;
+            }
+        }
+
+        public List<string> DatasSetup
+        {
+            get
+            {
+                var l = new List<string>();
+                l.Add(DatasDiagram.CreationQuery);
+                l.AddRange(DatasSeeds.Select(s => s.SeedQuery));
+                return l;
+            }
+        }
+
         public Mock<IExercisesContext> DbMock => _dbMock;
 
         private void EnableMock() =>
@@ -104,7 +126,6 @@ namespace SQLExerciser.Tests.Framework
             {
                 Diagram = _diagrams.First(),
                 DataSeedId = 1,
-                Judges = Judges.Take(1).ToList(),
                 SeedQuery =
                 "INSERT INTO departments (id, name, type) VALUES\n" +
                 "(1, 'first', 'AAA')," +
@@ -140,14 +161,14 @@ namespace SQLExerciser.Tests.Framework
                 AnswerQuery = "SELECT * FROM employees WHERE name LIKE 'josh'",
                 VerifyQuery = "",
                 JudgeId = 1,
-                Seeds = _seeds.Take(2).ToList()
+                Diagram = EmployeesDiagram
             });
             _judges.Add(new Judge
             {
                 AnswerQuery = "SELECT id FROM datas WHERE data LIKE 'aa*'",
                 VerifyQuery = "",
                 JudgeId = 2,
-                Seeds = _seeds.Skip(2).ToList()
+                Diagram = DatasDiagram
             });
 
             _exercises.Add(new Exercise
@@ -173,9 +194,6 @@ namespace SQLExerciser.Tests.Framework
                 Password = "Me123",
                 Id = 1
             });
-
-            _seeds.Take(2).ToList().ForEach(s => s.Judges = _judges.Where(j => j.JudgeId == 1).ToList());
-            _seeds.Last().Judges = new List<Judge> { Judges.Last() };
         }
     }
 }

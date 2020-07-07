@@ -6,22 +6,55 @@
 
 <h2>Solve</h2>
 
-<div class="text-capitalize">
+<div class="text-capitalize text-center">
     @Model.Title
 </div>
+<p>This exercise is of @Model.Difficulty / 100 difficulty.</p>
 <p>@Model.Description</p>
 
 <div>
-    <img class="img-rounded" src="@Url.Action("ReadImage", "Diagram", new { diagramId = Model.Judge.Diagram })"
-         width="300" height="300" />
+    <img class="img-rounded" src="@Url.Action("ReadImage", "Diagram", new { diagramId = Model.Judge.Diagram.DbDiagramId })" />
 </div>
-
-@using (Html.BeginForm("Solve", "Exercise", FormMethod.Post))
+@if(User.IsInRole("Solver"))
+{
+using (Html.BeginForm("Solve", "Exercise", FormMethod.Post))
 {
     <div class="form-group">
         <label for="query" class="control-label">Query to submit:</label>
-        @Html.TextArea("query", new { @id = "query", @Value = "Your answer", @cols = 30, @rows = 10 })
-        <input type="submit" role="button" class="btn-lg btn-info" />
+        @Html.TextArea("query", new { @id = "query", @Value = "Your answer", @cols = 100, @rows = 10 })
+        <div class="btn-group">
+            <input type="button" role="button" onclick="trySolution()" class="btn-lg btn-success" value="Test syntax"/>
+            <input type="submit" role="button" class="btn-lg btn-info" value="Submit solution" />
+        </div>
+        <label id="outputFromDb" class="control-label" name="outputFromDb"/>
     </div>
     <input hidden id="id" name="id" value="@Model.Judge.Diagram.DbDiagramId" />
 }
+}
+
+<script>
+    function trySolution() {
+        var solutionArea = document.getElementById('query').value;
+        var data = { query: solutionArea, diagramId: @Model.Judge.Diagram.DbDiagramId };
+        postTo('@Url.Action("TestQuery", "Exercise")', document.getElementById('outputFromDb'), data);
+    }
+
+    function postTo(url, label, data) {
+        $.ajax({
+            type: 'GET',
+            url: url,
+            data: data,
+            contentType: 'application/json; charset=utf-8',
+            dataType: 'json',
+            success: function (data) {
+                if (!data.result.startsWith('ERROR')) {
+                    data.result = 'OK'
+                }
+                label.innerText = 'Response from DB: ' + data.result; 
+            },
+            error: function (data) {
+                label.innerText = "Failed to receive response from the server: " + data.result;
+            }
+        });
+    }
+</script>

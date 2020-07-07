@@ -11,7 +11,7 @@ namespace SQLExerciser.Models.DB
 {
     public class ExerciseStatus
     {
-        [Key]
+        [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
 
         public virtual User User { get; set; }
@@ -21,6 +21,8 @@ namespace SQLExerciser.Models.DB
         public string Solution { get; set; }
 
         public string Resolution { get; set; }
+
+        public DateTime SubmittedOn { get; set; }
 
         public bool Accepted { get; set; }
     }

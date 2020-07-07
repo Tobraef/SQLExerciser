@@ -1,40 +1,49 @@
-﻿@model List<SQLExerciser.Models.Seed>
-
+﻿@model IEnumerable<IGrouping<int, SQLExerciser.Models.ViewModel.Seed>>
 @{
-    ViewBag.Title = "Pick";
+    ViewBag.Title = "GlobalSeeds";
 }
-<style>
-    .frame {
-        border-radius: 25px;
-        border: 2px solid #73AD21;
-        padding: 20px;
-        background-color: white;
-    }
-</style>
-<div style="background-color: aquamarine">
-    <h3>Available seeds</h3>
-    @if (Model.Count > 0)
+
+<h3>View of all seeds</h3>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Related table</th>
+            <th>Seeds</th>
+        </tr>
+    </thead>
+    @foreach (var group in Model)
     {
-        <div class="text-center">
-            <img class="img-rounded" src="@Url.Action("ReadImage", "Diagram", new { diagramId = Model.FirstOrDefault().DiagramId  })" 
-                 width="300" height="300" />
-        </div>
+        <tr>
+            <td>
+                <img class="img-rounded" src="@Url.Action("ReadImage", "Diagram", new { diagramId = group.Key })" />
+            </td>
+            <td>
+                <table style="padding: 10px; margin: 10px; border: none">
+                @foreach (var seed in group)
+                {
+                    <tr style="margin: 5px;">
+                        <td>
+                            <table class="text-center">
+                                <tr style="border-bottom: 1px solid #ddd">
+                                    <td>
+                                        <p>@seed.TableSeeds.First().TableName</p>
+                                        @foreach (var tab in seed.TableSeeds)
+                                        {
+                                            Html.RenderPartial("TableSeed", tab);
+                                        }
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                        <td>
+                        <td>
+                            @Html.ActionLink("Edit", "Edit", new { id = seed.Id }) |
+                            @Html.ActionLink("Remove", "Remove", new { id = seed.Id })
+                        </td>
+                    </tr>
+                }
+                </table>
+            </td>
+        </tr>
     }
-    <table class="text-center col-xs-10 table frame">
-        @foreach (var seed in Model)
-        {
-            <tr style="border-bottom: 1px solid #ddd">
-                <td>
-                    @foreach (var tab in seed.TableSeeds)
-                    {
-                        Html.RenderPartial("TableSeed", tab);
-                    }
-                    @Html.ActionLink("Remove seed", "Remove", new { id = seed.Id });
-                    <p>
-                        <strong>Related exercises: @string.Join(", ", seed.RelatedExercises)</strong>
-                    </p>
-                </td>
-            </tr>
-        }
-    </table>
-</div>
+</table>

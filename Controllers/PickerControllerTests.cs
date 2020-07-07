@@ -10,6 +10,7 @@ using SQLExerciser.Tests.Framework;
 using SQLExerciser.Controllers;
 using SQLExerciser.Models.DB;
 using SQLExerciser.Models;
+using SQLExerciser.Models.ViewModel;
 using Moq;
 using Xunit;
 
@@ -37,9 +38,8 @@ namespace SQLExerciser.Tests.Controllers
 
 
             Assert.Equal(returnUrl, redirect.Url);
-            Assert.True(model.All(m => m.Diagram.SequenceEqual(repository.EmployeesDiagram.Diagram)));
+            Assert.True(model.All(m => m.DiagramId == repository.EmployeesDiagram.DbDiagramId));
             Assert.Equal(2, model.Count);
-            Assert.True(model.All(m => m.RelatedExercises.SequenceEqual(repository.EmployeesExercises.Select(e => e.Title))));
         }
 
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestMethod]

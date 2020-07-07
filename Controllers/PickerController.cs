@@ -7,9 +7,11 @@ using System.Web.Mvc;
 
 using SQLExerciser.Models;
 using SQLExerciser.Models.DB;
+using SQLExerciser.Models.ViewModel;
 
 namespace SQLExerciser.Controllers
 {
+    [Authorize(Roles = Role.ExerciserRoles)]
     public class PickerController : Controller
     {
         readonly IExercisesContext _context;
@@ -34,12 +36,9 @@ namespace SQLExerciser.Controllers
         public async Task<ViewResult> PickSeed(int diagramId, string returnUrl)
         {
             _storage.StoreValue(returnUrl);
-            var relatedExercises = from e in _context.Exercises
-                                   where e.Judge.Diagram.DbDiagramId == diagramId
-                                   select e.Title;
             var seeds = from e in _context.Seeds
                         where e.Diagram.DbDiagramId == diagramId
-                        select new Seed(e.SeedQuery, e.DataSeedId, e.Diagram.DbDiagramId, relatedExercises);
+                        select new Seed(e.SeedQuery, e.DataSeedId, e.Diagram.DbDiagramId);
             return View(await Task.Run(() => seeds.ToList()));
         }
 

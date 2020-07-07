@@ -12,6 +12,7 @@ using SQLExerciser.Models;
 using Moq;
 
 using Xunit;
+using System.Web;
 
 namespace SQLExerciser.Tests.Controllers
 {
@@ -26,7 +27,7 @@ namespace SQLExerciser.Tests.Controllers
         private string SampleQuery => "CREATE TABLE HASH;";
 
         private DbDiagram SampleDiagram =>
-            new DbDiagram { CreationQuery = SampleQuery, Diagram = null, Name = "Hash", DbDiagramId = 0xc4 };
+            new DbDiagram { CreationQuery = SampleQuery, Diagram = new byte[] { 1, 2, 3 }, Name = "Hash", DbDiagramId = 0xc4 };
 
         private bool CompareSample(DbDiagram received, DbDiagram expected)
         {
@@ -50,7 +51,7 @@ namespace SQLExerciser.Tests.Controllers
             sut = new DiagramController(contextMocker.Object, testerMocker.Object);
 
             await sut.Create();
-            await sut.Create(SampleDiagram);
+            await sut.Create(SampleDiagram, null);
 
             contextMocker.Verify(c => c.SaveAsync(), () => Times.Once());
         }
@@ -66,7 +67,7 @@ namespace SQLExerciser.Tests.Controllers
             sut = new DiagramController(contextMocker.Object, testerMocker.Object);
 
             await sut.Create();
-            await sut.Create(SampleDiagram);
+            await sut.Create(SampleDiagram, null);
         }
 
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestMethod]

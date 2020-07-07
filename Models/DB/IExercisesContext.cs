@@ -16,7 +16,7 @@ namespace SQLExerciser.Models.DB
         IDbSet<Judge> Judges { get; }
         IDbSet<User> Users { get; }
         IDbSet<ExerciseStatus> Statuses { get; }
-        User CurrentUser { get; }
+        IDbSet<Role> Roles { get; set; }
 
         Task<int> SaveAsync();
     }

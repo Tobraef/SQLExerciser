@@ -1,10 +1,10 @@
-﻿@model SQLExerciser.Models.Seed.TableSeed
+﻿@model SQLExerciser.Models.ViewModel.Seed.TableSeed
 
-<p class="text-center">
-    <strong>@Model.TableName</strong>
-</p>
 <table class="table-bordered" style="font-size: large">
     <thead>
+        <tr>
+            <td>@Model.TableName</td>
+        </tr>
         <tr>
             @foreach (var header in Model.TableHeaders)
             {

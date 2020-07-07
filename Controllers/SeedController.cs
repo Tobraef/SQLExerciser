@@ -7,25 +7,35 @@ using System.Data.Entity;
 using System.Threading.Tasks;
 
 using SQLExerciser.Models.DB;
+using SQLExerciser.Models.ViewModel;
 using SQLExerciser.Models;
 
 namespace SQLExerciser.Controllers
 {
+    [Authorize(Roles = Role.ExerciserRoles)]
     public class SeedController : Controller
     {
         readonly IExercisesContext _context;
         readonly IQueryTester _tester;
 
         [HttpGet]
-        public async Task<ViewResult> Index(int diagramId)
+        public async Task<ViewResult> Details(int diagramId)
         {
-            var relatedExercises = (from e in _context.Exercises
-                                   where e.Judge.Diagram.DbDiagramId == diagramId
-                                   select e.Title).ToList();
             var seeds = (from e in _context.Seeds
                         where e.Diagram.DbDiagramId == diagramId
                         select e).ToList();
-            return View(await Task.Run(() => seeds.Select(e => new Seed(e.SeedQuery, diagramId, e.DataSeedId, relatedExercises)).ToList()));
+            return View(await Task.Run(() => seeds.Select(e => new Seed(e.SeedQuery, diagramId, e.DataSeedId)).ToList()));
+        }
+
+        [HttpGet]
+        public async Task<ViewResult> Index()
+        {
+            var seeds = _context.Seeds
+                .Include(s => s.Diagram)
+                .GroupBy(s => s.Diagram.DbDiagramId)
+                .ToList();
+            var parsedSeeds = seeds.SelectMany(gr => gr.Select(s => new Seed(s.SeedQuery, s.DataSeedId, gr.Key)));
+            return View(await Task.Run(() => parsedSeeds.GroupBy(s => s.DiagramId)));
         }
 
         Task<DbDiagram> FindDiagram(int diagramId) =>
@@ -49,11 +59,19 @@ namespace SQLExerciser.Controllers
                 }
                 else
                 {
-                    _context.Seeds.Add(new DataSeed
+                    if (seed.SeedId.HasValue)
                     {
-                        Diagram = await FindDiagram(seed.DiagramId),
-                        SeedQuery = seed.SeedQuery,
-                    });
+                        var dbSeed = await Task.Run(() => _context.Seeds.Find(seed.SeedId.Value));
+                        dbSeed.SeedQuery = seed.SeedQuery;
+                    }
+                    else
+                    {
+                        _context.Seeds.Add(new DataSeed
+                        {
+                            Diagram = await FindDiagram(seed.DiagramId),
+                            SeedQuery = seed.SeedQuery,
+                        });
+                    }
                     await _context.SaveAsync();
                     return RedirectToAction(nameof(Index), new { diagramId = seed.DiagramId });
                 }
@@ -62,6 +80,13 @@ namespace SQLExerciser.Controllers
             {
                 return View(seed);
             }
+        }
+
+        [HttpGet]
+        public async Task<ActionResult> Edit(int id)
+        {
+            var seed = await Task.Run(() => _context.Seeds.Find(id));
+            return View("Create", new SeedCreateViewModel { SeedId = id, DiagramId = seed.Diagram.DbDiagramId, SeedQuery = seed.SeedQuery });
         }
 
         [HttpPost]
@@ -75,8 +100,13 @@ namespace SQLExerciser.Controllers
         [HttpGet]
         public async Task<JsonResult> TestQuery(string query, int diagramId)
         {
-            var diagram = await FindDiagram(diagramId);
-            var output = await _tester.TestCRUD(diagram.CreationQuery, query);
+            var otherSeeds = await Task.Run(() => _context.Seeds
+                .Include(s => s.Diagram)
+                .Where(s => s.Diagram.DbDiagramId == diagramId));
+            var diagram = otherSeeds.FirstOrDefault()?.Diagram ?? _context.Diagrams.Find(diagramId);
+            var allSeeds = otherSeeds.Select(s => s.SeedQuery).ToList();
+            allSeeds.Add(query);
+            var output = await _tester.TestCRUD(diagram.CreationQuery, allSeeds);
             return Json(new {
                 success = true,
                 result = string.IsNullOrEmpty(output) ? "OK" : output

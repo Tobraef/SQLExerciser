@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 
-namespace SQLExerciser.Models
+namespace SQLExerciser.Models.ViewModel
 {
     public class Seed
     {
@@ -59,14 +59,10 @@ namespace SQLExerciser.Models
 
         public int DiagramId { get; set; }
 
-        public List<string> RelatedExercises { get; set; }
-
-        public Seed(string seedQuery, int id, int diagramId, IEnumerable<string> relatedExercises)
+        public Seed(string seedQuery, int id, int diagramId)
         {
             DiagramId = diagramId;
             Id = id;
-            if (relatedExercises != null)
-            RelatedExercises = relatedExercises.ToList();
             TableSeeds = seedQuery.Split(';').TakeWhile(s => !string.IsNullOrEmpty(s)).Select(s => new TableSeed(s)).ToList();
         }
     }
